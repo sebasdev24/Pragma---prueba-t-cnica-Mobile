@@ -16,7 +16,7 @@ Diseño en Figma: [Catbreeds — Prueba técnica Pragma](https://www.figma.com/d
 
 ## Instalación
 
-Si solo se quiere probar en Android, el APK está en la sección **Releases** de este repositorio y no necesita configurar nada.
+Si solo se quiere probar en Android, se puede [descargar el APK](https://github.com/sebasdev24/Pragma---prueba-t-cnica-Mobile/releases/latest/download/catbreeds-v1.0.0.apk) directamente (o verlo en [Releases](https://github.com/sebasdev24/Pragma---prueba-t-cnica-Mobile/releases/latest)). No necesita configurar nada.
 
 Para compilarla tú mismo necesitas Flutter 3.38 (Dart 3.10) o superior. Luego sigue estos pasos:
 
