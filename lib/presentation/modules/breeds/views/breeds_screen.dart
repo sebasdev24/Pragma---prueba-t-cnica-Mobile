@@ -1,3 +1,4 @@
+import 'package:catbreeds/core/constants/app_strings.dart';
 import 'package:catbreeds/core/extensions/context_extension.dart';
 import 'package:catbreeds/core/router/app_routes.dart';
 import 'package:catbreeds/domain/entities/breed.dart';
@@ -11,8 +12,9 @@ import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
-/// Landing: título, buscador fijo y cards. Con texto en el buscador muestra
-/// resultados de `/breeds/search`; sin texto, el listado paginado.
+/// La pantalla principal: título, buscador fijo arriba y las cards. Si hay
+/// algo escrito en el buscador muestra los resultados; si no, la lista
+/// completa.
 class BreedsScreen extends ConsumerStatefulWidget {
   const BreedsScreen({super.key});
 
@@ -24,19 +26,21 @@ class _BreedsScreenState extends ConsumerState<BreedsScreen> {
   final _queryController = TextEditingController();
   final _scrollController = ScrollController();
 
-  /// Distancia al final a la que se pide la siguiente página.
+  /// Cuando faltan menos de estos píxeles para el final, pedimos la
+  /// siguiente página.
   static const _loadMoreThreshold = 900.0;
 
   @override
   void initState() {
     super.initState();
     _scrollController.addListener(_onScroll);
-    // Si se entra sin pasar por la splash (deep link), carga aquí. Tras el
-    // primer frame: no se puede modificar un provider durante initState.
+    // Por si se entró sin pasar por la splash (un deep link, por ejemplo).
+    // Va después del primer frame porque Riverpod no deja tocar un
+    // provider dentro de initState.
     WidgetsBinding.instance.addPostFrameCallback(
       (_) => ref.read(breedsListProvider.notifier).loadFirstPage(),
     );
-    // Conserva el texto si se vuelve a esta pantalla con una búsqueda activa.
+    // Si volvemos a esta pantalla con una búsqueda activa, el texto sigue ahí.
     _queryController.text = ref.read(breedSearchProvider).query;
   }
 
@@ -61,8 +65,8 @@ class _BreedsScreenState extends ConsumerState<BreedsScreen> {
   }
 
   void _onQueryChanged(String query) {
-    // Los resultados empiezan arriba: si la lista estaba desplazada, se
-    // vuelve al inicio para que no queden fuera de vista.
+    // Si la lista estaba más abajo, subimos al inicio; si no, los
+    // resultados quedarían fuera de la vista.
     if (_scrollController.hasClients && _scrollController.offset > 0) {
       _scrollController.jumpTo(0);
     }
@@ -87,8 +91,8 @@ class _BreedsScreenState extends ConsumerState<BreedsScreen> {
     final search = ref.watch(breedSearchProvider);
     final spacing = context.spacing;
 
-    // Sin AppBar, así que la pantalla fija íconos oscuros en la barra de
-    // estado (el splash la deja en claro).
+    // Esta pantalla no tiene AppBar, así que ponemos nosotros los íconos
+    // oscuros en la barra de estado (la splash los deja blancos).
     return AnnotatedRegion<SystemUiOverlayStyle>(
       value: SystemUiOverlayStyle.dark,
       child: Scaffold(
@@ -151,12 +155,11 @@ class _BreedsScreenState extends ConsumerState<BreedsScreen> {
   // ---------------------------------------------------------------------------
 
   List<Widget> _listSlivers(BreedsListState list) {
-    final l10n = context.l10n;
     switch (list.status) {
       case BreedsListStatus.initial:
       case BreedsListStatus.loading:
         return [
-          _sectionLabel(l10n.allBreeds, trailing: l10n.sortAZ),
+          _sectionLabel(AppStrings.allBreeds, trailing: AppStrings.sortAZ),
           const _SkeletonList(count: 3),
         ];
       case BreedsListStatus.failure:
@@ -164,9 +167,9 @@ class _BreedsScreenState extends ConsumerState<BreedsScreen> {
           SliverToBoxAdapter(
             child: AppStatusView(
               tone: AppStatusTone.error,
-              title: l10n.errorTitle,
+              title: AppStrings.errorTitle,
               message: list.failure!.userMessage,
-              actionLabel: l10n.retry,
+              actionLabel: AppStrings.retry,
               onAction: () =>
                   ref.read(breedsListProvider.notifier).loadFirstPage(),
             ),
@@ -174,7 +177,7 @@ class _BreedsScreenState extends ConsumerState<BreedsScreen> {
         ];
       case BreedsListStatus.success:
         return [
-          _sectionLabel(l10n.allBreeds, trailing: l10n.sortAZ),
+          _sectionLabel(AppStrings.allBreeds, trailing: AppStrings.sortAZ),
           _cards(list.items),
           SliverToBoxAdapter(child: _ListFooter(list: list)),
         ];
@@ -186,19 +189,21 @@ class _BreedsScreenState extends ConsumerState<BreedsScreen> {
   // ---------------------------------------------------------------------------
 
   List<Widget> _searchSlivers(BreedSearchState search) {
-    final l10n = context.l10n;
     switch (search.status) {
       case BreedSearchStatus.idle:
       case BreedSearchStatus.loading:
-        return [_sectionLabel(l10n.searching), const _SkeletonList(count: 2)];
+        return [
+          _sectionLabel(AppStrings.searching),
+          const _SkeletonList(count: 2),
+        ];
       case BreedSearchStatus.failure:
         return [
           SliverToBoxAdapter(
             child: AppStatusView(
               tone: AppStatusTone.error,
-              title: l10n.errorTitle,
+              title: AppStrings.errorTitle,
               message: search.failure!.userMessage,
-              actionLabel: l10n.retry,
+              actionLabel: AppStrings.retry,
               onAction: () => ref.read(breedSearchProvider.notifier).retry(),
             ),
           ),
@@ -208,9 +213,9 @@ class _BreedsScreenState extends ConsumerState<BreedsScreen> {
           return [
             SliverToBoxAdapter(
               child: AppStatusView(
-                title: l10n.emptyTitle,
-                message: l10n.emptyBody(search.query),
-                actionLabel: l10n.clearSearch,
+                title: AppStrings.emptyTitle,
+                message: AppStrings.emptyBody(search.query),
+                actionLabel: AppStrings.clearSearch,
                 onAction: _clearSearch,
               ),
             ),
@@ -218,7 +223,7 @@ class _BreedsScreenState extends ConsumerState<BreedsScreen> {
         }
         return [
           _sectionLabel(
-            l10n.searchResults(search.results.length, search.query),
+            AppStrings.searchResults(search.results.length, search.query),
           ),
           _cards(search.results),
         ];
@@ -275,11 +280,10 @@ class _Header extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final colors = context.colors;
-    final l10n = context.l10n;
     final isFailure = list.status == BreedsListStatus.failure;
     final eyebrow = list.status == BreedsListStatus.success
-        ? l10n.breedsEyebrow(list.total)
-        : l10n.breedsEyebrowLoading;
+        ? AppStrings.breedsEyebrow(list.total)
+        : AppStrings.breedsEyebrowLoading;
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -303,7 +307,7 @@ class _Header extends StatelessWidget {
         Semantics(
           header: true,
           child: Text(
-            l10n.appTitle,
+            AppStrings.appTitle,
             style: context.typography.display.xl.copyWith(
               color: colors.foreground,
             ),
@@ -311,7 +315,7 @@ class _Header extends StatelessWidget {
         ),
         SizedBox(height: context.spacing.sm),
         Text(
-          l10n.breedsSubtitle,
+          AppStrings.breedsSubtitle,
           style: context.typography.display.italic.copyWith(
             color: colors.foregroundMuted,
           ),
@@ -329,7 +333,6 @@ class _ListFooter extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final spacing = context.spacing;
-    final l10n = context.l10n;
 
     final Widget child;
     if (list.isLoadingMore) {
@@ -338,20 +341,20 @@ class _ListFooter extends ConsumerWidget {
       child = Column(
         children: [
           Text(
-            l10n.loadMoreError,
+            AppStrings.loadMoreError,
             style: context.typography.system.subhead.copyWith(
               color: context.colors.foregroundMuted,
             ),
           ),
           SizedBox(height: spacing.md),
           AppOutlinedButton(
-            label: l10n.retry,
+            label: AppStrings.retry,
             onPressed: () => ref.read(breedsListProvider.notifier).loadMore(),
           ),
         ],
       );
     } else if (!list.hasMore) {
-      child = AppLabel(l10n.endOfList(list.items.length));
+      child = AppLabel(AppStrings.endOfList(list.items.length));
     } else {
       child = const SizedBox.shrink();
     }
@@ -384,7 +387,7 @@ class _SkeletonList extends StatelessWidget {
   }
 }
 
-/// Mantiene el buscador visible mientras se hace scroll.
+/// Deja el buscador pegado arriba mientras haces scroll.
 class _PinnedSearch extends SliverPersistentHeaderDelegate {
   _PinnedSearch({
     required this.child,
@@ -396,7 +399,8 @@ class _PinnedSearch extends SliverPersistentHeaderDelegate {
   final Color background;
   final EdgeInsets padding;
 
-  /// Alto del campo (44–48 según plataforma) más su padding vertical.
+  /// El campo mide entre 44 y 48 según la plataforma; a eso se le suma
+  /// el padding.
   static const _fieldHeight = 48.0;
 
   @override

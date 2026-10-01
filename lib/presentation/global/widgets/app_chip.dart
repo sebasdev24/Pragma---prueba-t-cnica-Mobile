@@ -1,7 +1,7 @@
 import 'package:catbreeds/core/extensions/context_extension.dart';
 import 'package:flutter/material.dart';
 
-/// Etiqueta de solo lectura con borde (temperamentos).
+/// Una etiqueta con borde que no se puede tocar.
 class AppChip extends StatelessWidget {
   const AppChip({super.key, required this.label});
 

@@ -1,13 +1,12 @@
 import 'package:catbreeds/core/extensions/context_extension.dart';
 import 'package:flutter/material.dart';
 
-/// Brillo animado para placeholders de carga.
+/// El brillo que recorre los placeholders mientras carga algo.
 ///
-/// Regla (igual que en 121Pass): **un solo `AppShimmer` por vista**, que
-/// envuelve todos sus [AppShimmerBox]. Hay un único `AnimationController` y
-/// un único degradado del tamaño de la vista; cada bloque pinta solo su
-/// porción, así todos brillan en fase como una sola onda y las superficies
-/// que no son bloques (el fondo de la card) no se tiñen.
+/// Va un solo `AppShimmer` por vista, envolviendo todos sus
+/// [AppShimmerBox]. Así hay una sola animación y un solo degradado del
+/// tamaño de la vista, y cada bloque pinta solo su parte. Así la onda pasa
+/// por todos los bloques a la vez y el fondo de las cards no se tiñe.
 class AppShimmer extends StatefulWidget {
   const AppShimmer({super.key, required this.child});
 
@@ -66,8 +65,9 @@ class _SlideGradient extends GradientTransform {
       Matrix4.translationValues(bounds.width * percent, 0, 0);
 }
 
-/// Bloque de placeholder. Se pinta con el degradado de su [AppShimmer];
-/// sin uno, o con "reducir movimiento" activo, queda como bloque estático.
+/// Un bloque gris de placeholder. Brilla con el degradado de su
+/// [AppShimmer]; si no tiene uno, o si el usuario activó "reducir
+/// movimiento", se queda quieto.
 class AppShimmerBox extends StatefulWidget {
   const AppShimmerBox({
     super.key,

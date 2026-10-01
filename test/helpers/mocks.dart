@@ -13,7 +13,7 @@ class MockBreedRepository extends Mock implements BreedRepository {}
 Breed fakeBreed(
   String id, {
   String? name,
-  int? intelligence,
+  String? weightKg = '3 - 5',
   String? origin = 'Egypt',
   String? countryCode = 'EG',
 }) {
@@ -25,8 +25,10 @@ Breed fakeBreed(
     origin: origin,
     countryCode: countryCode,
     lifeSpan: '12-15',
-    weightKg: '3-5',
+    weightKg: weightKg,
+    weightLb: '7 - 11',
+    heightCm: '25 - 30',
+    heightIn: '10 - 12',
     breedGroup: 'Short-haired',
-    intelligence: intelligence,
   );
 }

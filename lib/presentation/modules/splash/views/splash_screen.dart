@@ -1,3 +1,4 @@
+import 'package:catbreeds/core/constants/app_strings.dart';
 import 'package:catbreeds/core/extensions/context_extension.dart';
 import 'package:catbreeds/core/router/app_routes.dart';
 import 'package:catbreeds/presentation/global/widgets/widgets.dart';
@@ -7,13 +8,14 @@ import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
-/// Splash: continúa el splash nativo (mismo color y silueta) y aprovecha
-/// para pedir la primera página. Así la lista abre con datos, no con
-/// skeletons.
+/// La splash de Flutter. Arranca igual que la nativa (mismo color y misma
+/// silueta) y, mientras se ve, pide la primera página. Así la lista ya abre
+/// con datos y no con placeholders.
 class SplashScreen extends ConsumerStatefulWidget {
   const SplashScreen({super.key});
 
-  /// Tiempo mínimo en pantalla para que la animación de entrada se lea.
+  /// Lo mínimo que se queda en pantalla, para que alcance a verse la
+  /// animación.
   static const minDuration = Duration(milliseconds: 1400);
 
   @override
@@ -30,13 +32,13 @@ class _SplashScreenState extends ConsumerState<SplashScreen>
   @override
   void initState() {
     super.initState();
-    // Tras el primer frame: Riverpod no permite modificar un provider
-    // mientras se construye el árbol (initState incluido).
+    // Esperamos al primer frame porque Riverpod no deja modificar un
+    // provider mientras se está construyendo el árbol.
     WidgetsBinding.instance.addPostFrameCallback((_) => _warmUpAndContinue());
   }
 
   Future<void> _warmUpAndContinue() async {
-    // Un error aquí no bloquea: la lista mostrará su propio estado de error.
+    // Si la carga falla, igual seguimos; la lista ya sabe mostrar el error.
     await Future.wait([
       Future<void>.delayed(SplashScreen.minDuration),
       ref.read(breedsListProvider.notifier).loadFirstPage(),
@@ -50,8 +52,8 @@ class _SplashScreenState extends ConsumerState<SplashScreen>
     super.dispose();
   }
 
-  /// Mismo tamaño que la silueta del splash nativo, para que el relevo
-  /// entre ambos no salte.
+  /// Igual que en la splash nativa, para que no se note el cambio de una a
+  /// otra.
   static const _markSize = 132.0;
   static const _titleSize = 52.0;
   static const _progressWidth = 96.0;
@@ -71,8 +73,9 @@ class _SplashScreenState extends ConsumerState<SplashScreen>
       value: SystemUiOverlayStyle.light,
       child: Scaffold(
         backgroundColor: colors.accent,
-        // Sin SafeArea a propósito: el splash nativo centra la silueta en
-        // la ventana completa y aquí debe quedar en el mismo punto.
+        // Sin SafeArea a propósito. La splash nativa centra la silueta en
+        // toda la ventana y aquí tiene que caer exactamente en el mismo
+        // punto.
         body: LayoutBuilder(
           builder: (context, constraints) {
             final center = constraints.maxHeight / 2;
@@ -96,7 +99,7 @@ class _SplashScreenState extends ConsumerState<SplashScreen>
                       child: Column(
                         children: [
                           Text(
-                            context.l10n.appTitle,
+                            AppStrings.appTitle,
                             textAlign: TextAlign.center,
                             style: context.typography.display.xl.copyWith(
                               color: colors.onAccent,
@@ -105,7 +108,7 @@ class _SplashScreenState extends ConsumerState<SplashScreen>
                           ),
                           SizedBox(height: spacing.base),
                           Text(
-                            context.l10n.splashTagline,
+                            AppStrings.splashTagline,
                             textAlign: TextAlign.center,
                             style: context.typography.display.italic.copyWith(
                               color: colors.onAccent.withValues(alpha: 0.8),
@@ -139,7 +142,7 @@ class _SplashScreenState extends ConsumerState<SplashScreen>
                         ),
                         SizedBox(height: spacing.lg),
                         AppLabel(
-                          context.l10n.splashCredit,
+                          AppStrings.splashCredit,
                           color: colors.onAccent.withValues(alpha: 0.7),
                         ),
                       ],

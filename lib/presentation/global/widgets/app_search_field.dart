@@ -1,32 +1,31 @@
+import 'package:catbreeds/core/constants/app_strings.dart';
 import 'package:catbreeds/core/extensions/context_extension.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 
-/// Campo de búsqueda con el control nativo de cada plataforma:
-/// `CupertinoSearchTextField` + "Cancelar" en iOS, `TextField` Material en
-/// Android. Mismos tokens de color en ambos.
+/// El buscador, con el control que cada plataforma usa: en iOS
+/// el `CupertinoSearchTextField` y en Android un `TextField` de Material.
+/// Los dos usan los mismos colores.
 class AppSearchField extends StatefulWidget {
   const AppSearchField({
     super.key,
     required this.controller,
     required this.onChanged,
     required this.onClear,
-    this.focusNode,
   });
 
   final TextEditingController controller;
   final ValueChanged<String> onChanged;
 
-  /// Se llama al borrar el texto o al tocar "Cancelar".
+  /// Se llama cuando se borra el texto o se toca "Cancel".
   final VoidCallback onClear;
-  final FocusNode? focusNode;
 
   @override
   State<AppSearchField> createState() => _AppSearchFieldState();
 }
 
 class _AppSearchFieldState extends State<AppSearchField> {
-  late final FocusNode _focus = widget.focusNode ?? FocusNode();
+  final _focus = FocusNode();
 
   @override
   void initState() {
@@ -39,7 +38,7 @@ class _AppSearchFieldState extends State<AppSearchField> {
   void dispose() {
     _focus.removeListener(_rebuild);
     widget.controller.removeListener(_rebuild);
-    if (widget.focusNode == null) _focus.dispose();
+    _focus.dispose();
     super.dispose();
   }
 
@@ -71,7 +70,7 @@ class _AppSearchFieldState extends State<AppSearchField> {
           child: CupertinoSearchTextField(
             controller: widget.controller,
             focusNode: _focus,
-            placeholder: context.l10n.searchHint,
+            placeholder: AppStrings.searchHint,
             onChanged: widget.onChanged,
             onSuffixTap: _clear,
             autocorrect: false,
@@ -99,7 +98,7 @@ class _AppSearchFieldState extends State<AppSearchField> {
                   minimumSize: Size.zero,
                   onPressed: _cancel,
                   child: Text(
-                    context.l10n.searchCancel,
+                    AppStrings.searchCancel,
                     style: context.typography.system.body.copyWith(
                       color: colors.accent,
                     ),
@@ -123,7 +122,7 @@ class _AppSearchFieldState extends State<AppSearchField> {
       textInputAction: TextInputAction.search,
       style: context.typography.system.body.copyWith(color: colors.foreground),
       decoration: InputDecoration(
-        hintText: context.l10n.searchHint,
+        hintText: AppStrings.searchHint,
         hintStyle: context.typography.system.body.copyWith(
           color: colors.foregroundSubtle,
         ),
@@ -137,7 +136,7 @@ class _AppSearchFieldState extends State<AppSearchField> {
         ),
         suffixIcon: hasText
             ? IconButton(
-                tooltip: context.l10n.searchClear,
+                tooltip: AppStrings.searchClear,
                 icon: Icon(
                   Icons.cancel_rounded,
                   color: colors.foregroundSubtle,

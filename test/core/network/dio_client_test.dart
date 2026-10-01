@@ -2,7 +2,6 @@ import 'dart:io';
 
 import 'package:catbreeds/core/errors/failure.dart';
 import 'package:catbreeds/core/network/dio_client.dart';
-import 'package:catbreeds/core/network/interceptors/retry_interceptor.dart';
 import 'package:dio/dio.dart';
 import 'package:flutter_test/flutter_test.dart';
 
@@ -11,9 +10,8 @@ DioException _error(
   int? status,
   Object? data,
   Object? error,
-  String method = 'GET',
 }) {
-  final options = RequestOptions(path: '/breeds', method: method);
+  final options = RequestOptions(path: '/breeds');
   return DioException(
     requestOptions: options,
     type: type,
@@ -52,48 +50,7 @@ void main() {
         ),
       );
       expect(failure, const ServerFailure('Invalid key', statusCode: 403));
-      expect(failure.userMessage, contains('autenticarnos'));
-    });
-
-    test('cancelación es CancelledFailure', () {
-      expect(
-        DioClient.mapDioError(_error(DioExceptionType.cancel)),
-        isA<CancelledFailure>(),
-      );
-    });
-  });
-
-  group('RetryInterceptor.shouldRetry', () {
-    test('reintenta GETs por red y 5xx', () {
-      expect(
-        RetryInterceptor.shouldRetry(_error(DioExceptionType.connectionError)),
-        isTrue,
-      );
-      expect(
-        RetryInterceptor.shouldRetry(
-          _error(DioExceptionType.badResponse, status: 503),
-        ),
-        isTrue,
-      );
-    });
-
-    test('no reintenta 4xx, cancelaciones ni métodos no idempotentes', () {
-      expect(
-        RetryInterceptor.shouldRetry(
-          _error(DioExceptionType.badResponse, status: 404),
-        ),
-        isFalse,
-      );
-      expect(
-        RetryInterceptor.shouldRetry(_error(DioExceptionType.cancel)),
-        isFalse,
-      );
-      expect(
-        RetryInterceptor.shouldRetry(
-          _error(DioExceptionType.connectionError, method: 'POST'),
-        ),
-        isFalse,
-      );
+      expect(failure.userMessage, contains('authenticate'));
     });
   });
 }

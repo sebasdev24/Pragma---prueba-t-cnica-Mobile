@@ -1,3 +1,4 @@
+import 'package:catbreeds/core/constants/app_strings.dart';
 import 'dart:math' as math;
 
 import 'package:catbreeds/core/errors/failure.dart';
@@ -9,11 +10,11 @@ import 'package:catbreeds/presentation/modules/breeds/widgets/breed_card.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-/// Detalle de una raza.
+/// El detalle de una raza.
 ///
-/// Requisito del enunciado: la imagen queda fija y solo la información se
-/// desplaza. Por eso la foto está fuera del scroll y el `Scrollbar` solo
-/// envuelve la ficha.
+/// El enunciado pide que la foto se quede quieta y que solo la información
+/// haga scroll. Por eso la foto va por fuera del scroll y el `Scrollbar`
+/// envuelve únicamente la ficha.
 class BreedDetailScreen extends ConsumerWidget {
   const BreedDetailScreen({super.key, required this.breedId});
 
@@ -22,7 +23,6 @@ class BreedDetailScreen extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final detail = ref.watch(breedDetailProvider(breedId));
-    final l10n = context.l10n;
 
     return Scaffold(
       appBar: AppBar(
@@ -36,11 +36,11 @@ class BreedDetailScreen extends ConsumerWidget {
           child: SingleChildScrollView(
             child: AppStatusView(
               tone: AppStatusTone.error,
-              title: l10n.detailErrorTitle,
+              title: AppStrings.detailErrorTitle,
               message: error is Failure
                   ? error.userMessage
                   : const UnknownFailure('').userMessage,
-              actionLabel: l10n.retry,
+              actionLabel: AppStrings.retry,
               onAction: () => ref.invalidate(breedDetailProvider(breedId)),
             ),
           ),
@@ -50,7 +50,8 @@ class BreedDetailScreen extends ConsumerWidget {
   }
 }
 
-/// Alto de la foto fija: ~36 % de la pantalla, con tope para tablets.
+/// La foto ocupa más o menos un tercio de la pantalla, con un tope para que
+/// en tablets no quede gigante.
 double _photoHeight(BuildContext context) =>
     math.min(MediaQuery.sizeOf(context).height * 0.36, 360);
 
@@ -62,8 +63,6 @@ class _DetailBody extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final spacing = context.spacing;
-    final colors = context.colors;
-    final l10n = context.l10n;
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -77,47 +76,92 @@ class _DetailBody extends StatelessWidget {
               child: AppNetworkImage(
                 url: breed.imageUrl,
                 borderRadius: BorderRadius.circular(context.radius.xl2),
-                semanticLabel: l10n.photoOf(breed.name),
-                fallbackLabel: l10n.noPhoto,
+                semanticLabel: AppStrings.photoOf(breed.name),
+                fallbackLabel: AppStrings.noPhoto,
               ),
             ),
           ),
         ),
         Expanded(
-          child: Stack(
-            children: [
-              Scrollbar(
-                child: SingleChildScrollView(
-                  padding: EdgeInsets.fromLTRB(
-                    spacing.lg,
-                    spacing.xl,
-                    spacing.lg,
-                    MediaQuery.paddingOf(context).bottom + spacing.safe,
-                  ),
-                  child: _BreedInfo(breed: breed),
+          child: _TopFade(
+            height: spacing.safe,
+            child: Scrollbar(
+              child: SingleChildScrollView(
+                padding: EdgeInsets.fromLTRB(
+                  spacing.lg,
+                  spacing.xl,
+                  spacing.lg,
+                  MediaQuery.paddingOf(context).bottom + spacing.safe,
                 ),
+                child: _BreedInfo(breed: breed),
               ),
-              // Borde superior difuminado: se lee que el texto pasa por
-              // debajo del límite de la foto, que no se mueve.
-              IgnorePointer(
-                child: Container(
-                  height: spacing.lg,
-                  decoration: BoxDecoration(
-                    gradient: LinearGradient(
-                      begin: Alignment.topCenter,
-                      end: Alignment.bottomCenter,
-                      colors: [
-                        colors.background,
-                        colors.background.withValues(alpha: 0),
-                      ],
-                    ),
-                  ),
-                ),
-              ),
-            ],
+            ),
           ),
         ),
       ],
+    );
+  }
+}
+
+/// Desvanece el texto a medida que sube y se mete debajo de la foto. Sin
+/// scroll no hay fade, así el título se ve completo al abrir el detalle; el
+/// efecto entra de a poco durante los primeros píxeles de desplazamiento.
+class _TopFade extends StatefulWidget {
+  const _TopFade({required this.height, required this.child});
+
+  /// Alto de la franja que se desvanece.
+  final double height;
+  final Widget child;
+
+  @override
+  State<_TopFade> createState() => _TopFadeState();
+}
+
+class _TopFadeState extends State<_TopFade> {
+  /// 0 sin scroll, 1 cuando ya se desplazó el alto de la franja.
+  final _progress = ValueNotifier<double>(0);
+
+  @override
+  void dispose() {
+    _progress.dispose();
+    super.dispose();
+  }
+
+  bool _onScroll(ScrollNotification n) {
+    if (n.depth == 0 && n.metrics.axis == Axis.vertical) {
+      _progress.value = (n.metrics.pixels / widget.height).clamp(0.0, 1.0);
+    }
+    return false;
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return NotificationListener<ScrollNotification>(
+      onNotification: _onScroll,
+      child: ValueListenableBuilder<double>(
+        valueListenable: _progress,
+        child: widget.child,
+        // Siempre con ShaderMask: si se quitara al volver arriba, el árbol
+        // cambiaría y el scroll perdería su posición.
+        builder: (context, progress, child) {
+          return ShaderMask(
+            blendMode: BlendMode.dstIn,
+            shaderCallback: (bounds) {
+              final stop = (widget.height / bounds.height).clamp(0.0, 1.0);
+              return LinearGradient(
+                begin: Alignment.topCenter,
+                end: Alignment.bottomCenter,
+                colors: [
+                  Colors.black.withValues(alpha: 1 - progress),
+                  Colors.black,
+                ],
+                stops: [0, stop],
+              ).createShader(bounds);
+            },
+            child: child,
+          );
+        },
+      ),
     );
   }
 }
@@ -131,12 +175,8 @@ class _BreedInfo extends StatelessWidget {
   Widget build(BuildContext context) {
     final spacing = context.spacing;
     final colors = context.colors;
-    final l10n = context.l10n;
 
-    final eyebrow = [
-      if (breed.breedGroup != null) breed.breedGroup!.toUpperCase(),
-      if (breed.heightCm != null) '${breed.heightCm} CM',
-    ].join(' · ');
+    final eyebrow = breed.breedGroup?.toUpperCase() ?? '';
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -164,12 +204,12 @@ class _BreedInfo extends StatelessWidget {
           ),
         ],
         SizedBox(height: spacing.xl2),
-        AppLabel(l10n.breedSheet),
+        AppLabel(AppStrings.breedSheet),
         SizedBox(height: spacing.md),
         _StatsGrid(breed: breed),
         if (breed.temperament.isNotEmpty) ...[
           SizedBox(height: spacing.xl2),
-          AppLabel(l10n.temperament),
+          AppLabel(AppStrings.temperament),
           SizedBox(height: spacing.md),
           Wrap(
             spacing: spacing.base,
@@ -179,7 +219,7 @@ class _BreedInfo extends StatelessWidget {
         ],
         if (breed.history != null) ...[
           SizedBox(height: spacing.xl2),
-          AppLabel(l10n.history),
+          AppLabel(AppStrings.history),
           SizedBox(height: spacing.md),
           Text(
             breed.history!,
@@ -191,14 +231,17 @@ class _BreedInfo extends StatelessWidget {
         SizedBox(height: spacing.xl2),
         Divider(height: 1, color: colors.border),
         SizedBox(height: spacing.lg),
-        AppLabel(l10n.source(breed.id.toUpperCase())),
+        AppLabel(AppStrings.source(breed.id.toUpperCase())),
       ],
     );
   }
 }
 
-/// Ficha 2×2: país de origen, inteligencia, adaptabilidad y esperanza de
-/// vida (los cuatro datos que pide el enunciado).
+/// La ficha de 2×2: origen, peso, altura y esperanza de vida.
+///
+/// El enunciado pedía inteligencia y adaptabilidad, pero The Cat API ya no
+/// los manda en ningún endpoint. Peso y altura sí vienen en todas las
+/// razas, en kilos y libras, y en centímetros y pulgadas.
 class _StatsGrid extends StatelessWidget {
   const _StatsGrid({required this.breed});
 
@@ -206,7 +249,6 @@ class _StatsGrid extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final l10n = context.l10n;
     final gap = context.spacing.md;
 
     Widget row(Widget a, Widget b) => IntrinsicHeight(
@@ -223,38 +265,42 @@ class _StatsGrid extends StatelessWidget {
     return Column(
       children: [
         row(
-          StatTile.text(
-            label: l10n.originLabel,
-            value: breed.origin ?? l10n.unknownOrigin,
+          StatTile(
+            label: AppStrings.originLabel,
+            value: breed.origin ?? AppStrings.unknownOrigin,
             caption: breed.countryCode == null
                 ? null
-                : l10n.countryCodeValue(breed.countryCode!),
+                : AppStrings.countryCodeValue(breed.countryCode!),
           ),
-          StatTile.rating(
-            label: l10n.intelligenceLabel,
-            rating: breed.intelligence,
+          StatTile(
+            label: AppStrings.weightLabel,
+            value: _or(breed.weightKg, AppStrings.kilograms),
+            caption: _optional(breed.weightLb, AppStrings.pounds),
           ),
         ),
         SizedBox(height: gap),
         row(
-          StatTile.rating(
-            label: l10n.adaptabilityLabel,
-            rating: breed.adaptability,
+          StatTile(
+            label: AppStrings.heightLabel,
+            value: _or(breed.heightCm, AppStrings.centimeters),
+            caption: _optional(breed.heightIn, AppStrings.inches),
           ),
-          StatTile.text(
-            label: l10n.lifeSpanLabel,
-            value: breed.lifeSpan == null
-                ? l10n.noData
-                : l10n.lifeSpanValue(breed.lifeSpan!),
-            caption: breed.weightKg == null
-                ? null
-                : l10n.weightValue(breed.weightKg!),
+          StatTile(
+            label: AppStrings.lifeSpanLabel,
+            value: _or(breed.lifeSpan, AppStrings.lifeSpanValue),
           ),
         ),
       ],
     );
   }
 }
+
+/// El rango con su unidad, o "No data" si no vino.
+String _or(String? range, String Function(String) unit) =>
+    range == null ? AppStrings.noData : unit(range);
+
+String? _optional(String? range, String Function(String) unit) =>
+    range == null ? null : unit(range);
 
 class _DetailSkeleton extends StatelessWidget {
   const _DetailSkeleton();

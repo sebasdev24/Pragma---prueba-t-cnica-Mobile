@@ -1,8 +1,10 @@
 import 'package:catbreeds/domain/entities/breed.dart';
 
-/// DTO de `/v1/breeds`. Parsea a la defensiva: The Cat API cambia de forma
-/// sin versionar (hoy ya no manda `intelligence` ni `adaptability`), así
-/// que un campo ausente o con otro tipo nunca debe tumbar la lista.
+/// Una raza tal como la manda `/v1/breeds`.
+///
+/// El parseo se hizo desconfiado a propósito. The Cat API cambia sin avisar (ya
+/// dejó de mandar `intelligence` y `adaptability`), así que si un campo
+/// falta o llega con otro tipo, queda en null y la lista sigue cargando.
 class BreedModel {
   final String id;
   final String name;
@@ -12,14 +14,13 @@ class BreedModel {
   final String? countryCode;
   final String? lifeSpan;
   final String? weightMetric;
+  final String? weightImperial;
   final String? heightMetric;
+  final String? heightImperial;
   final String? breedGroup;
   final String? history;
-  final int? intelligence;
-  final int? adaptability;
   final String? imageUrl;
   final String? referenceImageId;
-  final String? wikipediaUrl;
 
   const BreedModel({
     required this.id,
@@ -30,18 +31,15 @@ class BreedModel {
     this.countryCode,
     this.lifeSpan,
     this.weightMetric,
+    this.weightImperial,
     this.heightMetric,
+    this.heightImperial,
     this.breedGroup,
     this.history,
-    this.intelligence,
-    this.adaptability,
     this.imageUrl,
     this.referenceImageId,
-    this.wikipediaUrl,
   });
 
-  /// CDN de imágenes de The Cat API. Se usa cuando la respuesta trae
-  /// `reference_image_id` pero no el objeto `image` (p. ej. `/breeds/{id}`).
   static const _imageCdn = 'https://cdn2.thecatapi.com/images';
 
   factory BreedModel.fromJson(Map<String, dynamic> json) {
@@ -54,15 +52,14 @@ class BreedModel {
       origin: _string(json['origin']),
       countryCode: _string(json['country_code']),
       lifeSpan: _string(json['life_span']),
-      weightMetric: _metric(json['weight']),
-      heightMetric: _metric(json['height']),
+      weightMetric: _unit(json['weight'], 'metric'),
+      weightImperial: _unit(json['weight'], 'imperial'),
+      heightMetric: _unit(json['height'], 'metric'),
+      heightImperial: _unit(json['height'], 'imperial'),
       breedGroup: _string(json['breed_group']),
       history: _string(json['history']),
-      intelligence: _score(json['intelligence']),
-      adaptability: _score(json['adaptability']),
       imageUrl: image is Map ? _string(image['url']) : null,
       referenceImageId: _string(json['reference_image_id']),
-      wikipediaUrl: _string(json['wikipedia_url']),
     );
   }
 
@@ -84,13 +81,12 @@ class BreedModel {
       countryCode: countryCode,
       lifeSpan: lifeSpan,
       weightKg: weightMetric,
+      weightLb: weightImperial,
       heightCm: heightMetric,
+      heightIn: heightImperial,
       breedGroup: breedGroup,
       history: history,
-      intelligence: intelligence,
-      adaptability: adaptability,
       imageUrl: resolvedImage,
-      wikipediaUrl: wikipediaUrl,
     );
   }
 
@@ -100,12 +96,7 @@ class BreedModel {
     return trimmed.isEmpty ? null : trimmed;
   }
 
-  static String? _metric(Object? value) =>
-      value is Map ? _string(value['metric']) : null;
-
-  /// Solo acepta la escala 1–5; cualquier otra cosa es "sin dato".
-  static int? _score(Object? value) {
-    final n = value is num ? value.toInt() : null;
-    return (n != null && n >= 1 && n <= 5) ? n : null;
-  }
+  /// `weight` y `height` vienen como `{metric, imperial}`; esto saca uno.
+  static String? _unit(Object? value, String system) =>
+      value is Map ? _string(value[system]) : null;
 }

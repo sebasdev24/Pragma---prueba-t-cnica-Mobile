@@ -2,7 +2,6 @@ import 'package:catbreeds/core/di/breed_dependencies.dart';
 import 'package:catbreeds/core/router/app_routes.dart';
 import 'package:catbreeds/core/theme/app_theme.dart';
 import 'package:catbreeds/domain/entities/breed_page.dart';
-import 'package:catbreeds/l10n/app_localizations.dart';
 import 'package:catbreeds/presentation/modules/splash/views/splash_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -44,15 +43,13 @@ void main() {
           overrides: [breedRepositoryProvider.overrideWithValue(repository)],
           child: MaterialApp.router(
             theme: AppTheme.light,
-            locale: const Locale('es'),
-            localizationsDelegates: AppLocalizations.localizationsDelegates,
-            supportedLocales: AppLocalizations.supportedLocales,
             routerConfig: router,
           ),
         ),
       );
 
-      expect(find.text('Guía de razas felinas'), findsOneWidget);
+      expect(find.text('A field guide to cat breeds'), findsOneWidget);
+      expect(find.text('Sebastian Agudelo - Pragma PT'), findsOneWidget);
 
       await tester.pump(SplashScreen.minDuration);
       await tester.pumpAndSettle();

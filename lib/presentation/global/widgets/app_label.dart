@@ -1,8 +1,8 @@
 import 'package:catbreeds/core/extensions/context_extension.dart';
 import 'package:flutter/material.dart';
 
-/// Rótulo en Geist Mono, mayúsculas y con tracking (Mono/Label en Figma).
-/// El texto debe llegar ya en mayúsculas desde las traducciones.
+/// Los rótulos pequeños en Geist Mono con letras separadas (Mono/Label en
+/// el Figma). El texto tiene que llegar ya en mayúsculas.
 class AppLabel extends StatelessWidget {
   const AppLabel(this.text, {super.key, this.color});
 

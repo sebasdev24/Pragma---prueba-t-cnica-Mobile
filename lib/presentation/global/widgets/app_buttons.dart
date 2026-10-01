@@ -1,8 +1,8 @@
 import 'package:catbreeds/core/extensions/context_extension.dart';
 import 'package:flutter/material.dart';
 
-/// Botón principal (pastilla terracota). Acciones de recuperación como
-/// "Reintentar".
+/// El botón principal, la pastilla terracota. Lo usamos para acciones como
+/// "Retry".
 class AppPrimaryButton extends StatelessWidget {
   const AppPrimaryButton({
     super.key,
@@ -36,7 +36,7 @@ class AppPrimaryButton extends StatelessWidget {
   }
 }
 
-/// Botón secundario con borde. Acciones neutras como "Limpiar búsqueda".
+/// Botón secundario, solo con borde, para acciones como "Clear search".
 class AppOutlinedButton extends StatelessWidget {
   const AppOutlinedButton({
     super.key,
@@ -68,7 +68,7 @@ class AppOutlinedButton extends StatelessWidget {
   }
 }
 
-/// Pastilla compacta de acento suave con flecha. Es el "Más…" de la card.
+/// La pastilla pequeña con flecha. Es el "More" de cada card.
 class AppPillButton extends StatelessWidget {
   const AppPillButton({
     super.key,

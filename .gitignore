@@ -44,9 +44,7 @@ app.*.map.json
 /android/app/profile
 /android/app/release
 
-# Variables de entorno (la key de The Cat API vive aquí)
+# El .env lleva la key de The Cat API, no se sube
 .env
-.env.dev
-.env.prod
-# Código generado por build_runner / envied
+# Lo que genera build_runner (incluida la key ofuscada de Envied)
 *.g.dart

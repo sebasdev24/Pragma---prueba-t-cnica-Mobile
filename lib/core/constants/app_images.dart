@@ -1,6 +1,6 @@
 class AppImages {
   const AppImages._();
 
-  /// Silueta del gato (marca). Se tiñe con `ColorFilter` según el contexto.
+  /// La silueta del gato de la marca.
   static const String catMark = 'assets/images/cat_mark.svg';
 }

@@ -1,7 +1,7 @@
 import 'package:equatable/equatable.dart';
 
-/// Raza de gato tal como la usa la app. Todo lo que la API puede omitir es
-/// nullable: la UI decide cómo mostrar el "sin dato", no el parser.
+/// Una raza como la usa la app. Lo que la API a veces no manda es nullable,
+/// y es la vista la que decide cómo mostrar que falta.
 class Breed extends Equatable {
   final String id;
   final String name;
@@ -10,23 +10,23 @@ class Breed extends Equatable {
   final String? origin;
   final String? countryCode;
 
-  /// Rango en años tal cual lo da la API, p. ej. `"14 - 17"`.
+  /// En años y tal como lo manda la API, por ejemplo `"14 - 17"`.
   final String? lifeSpan;
 
-  /// Rango en kg, p. ej. `"3 - 5"`.
+  /// En kilos, por ejemplo `"3 - 5"`.
   final String? weightKg;
 
-  /// Rango en cm, p. ej. `"25-30"`.
+  /// En libras, por ejemplo `"8 - 12"`.
+  final String? weightLb;
+
+  /// En centímetros, por ejemplo `"25-30"`.
   final String? heightCm;
+
+  /// En pulgadas, por ejemplo `"10-12"`.
+  final String? heightIn;
   final String? breedGroup;
   final String? history;
-
-  /// Escala 1–5. Hoy `/v1/breeds` no los devuelve (el enunciado sí los
-  /// pide), así que la UI muestra "Sin dato" cuando vienen en `null`.
-  final int? intelligence;
-  final int? adaptability;
   final String? imageUrl;
-  final String? wikipediaUrl;
 
   const Breed({
     required this.id,
@@ -37,16 +37,13 @@ class Breed extends Equatable {
     this.countryCode,
     this.lifeSpan,
     this.weightKg,
+    this.weightLb,
     this.heightCm,
+    this.heightIn,
     this.breedGroup,
     this.history,
-    this.intelligence,
-    this.adaptability,
     this.imageUrl,
-    this.wikipediaUrl,
   });
-
-  bool get hasImage => imageUrl != null && imageUrl!.isNotEmpty;
 
   @override
   List<Object?> get props => [
@@ -58,12 +55,11 @@ class Breed extends Equatable {
     countryCode,
     lifeSpan,
     weightKg,
+    weightLb,
     heightCm,
+    heightIn,
     breedGroup,
     history,
-    intelligence,
-    adaptability,
     imageUrl,
-    wikipediaUrl,
   ];
 }

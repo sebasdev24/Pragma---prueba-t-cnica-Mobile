@@ -1,5 +1,5 @@
-/// Respuestas reales de The Cat API (recortadas) para las pruebas.
-/// Nótese que no traen `intelligence` ni `adaptability`: así responde hoy.
+/// Respuestas reales de The Cat API, recortadas, para las pruebas. No
+/// traen `intelligence` ni `adaptability` porque hoy la API ya no los manda.
 const Map<String, dynamic> abyssinianJson = {
   'id': 'abys',
   'name': 'Abyssinian',
@@ -23,7 +23,7 @@ const Map<String, dynamic> abyssinianJson = {
   },
 };
 
-/// Raza real sin foto ni origen (Asian Semi-longhair en la API).
+/// Una raza real que no tiene foto ni origen (Asian Semi-longhair).
 const Map<String, dynamic> noImageJson = {
   'id': 'asl',
   'name': 'Asian Semi-longhair',
@@ -34,13 +34,13 @@ const Map<String, dynamic> noImageJson = {
   'height': {'metric': '25-30'},
 };
 
-/// Formato antiguo de la API, con las escalas que pide el enunciado.
-const Map<String, dynamic> legacyScoresJson = {
+/// Así responde `/breeds/{id}`: con `reference_image_id` pero sin el
+/// objeto `image`.
+const Map<String, dynamic> referenceOnlyJson = {
   'id': 'beng',
   'name': 'Bengal',
   'description': 'Spotted.',
   'temperament': 'Alert, Agile',
-  'intelligence': 5,
-  'adaptability': 4,
+  'weight': {'imperial': '10 - 18', 'metric': '4.5 - 8.2'},
   'reference_image_id': 'dN6eoeLjY',
 };

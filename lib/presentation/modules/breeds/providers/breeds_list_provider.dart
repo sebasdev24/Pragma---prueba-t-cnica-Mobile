@@ -12,17 +12,19 @@ class BreedsListState extends Equatable {
   final BreedsListStatus status;
   final List<Breed> items;
 
-  /// Total según la API (`pagination-count`).
+  /// Cuántas razas hay en total, según la API (`pagination-count`).
   final int total;
 
-  /// Próxima página a pedir (la API pagina desde 0).
+  /// La siguiente página que toca pedir. Empiezan en 0.
   final int nextPage;
   final bool isLoadingMore;
 
-  /// Error de la primera página: ocupa toda la pantalla.
+  /// Si falla la primera página no hay nada que mostrar, así que el error
+  /// ocupa toda la pantalla.
   final Failure? failure;
 
-  /// Error al paginar: solo afecta al pie de la lista.
+  /// Si falla una página posterior, lo ya cargado se queda y el error solo
+  /// aparece al final de la lista.
   final Failure? loadMoreFailure;
 
   const BreedsListState({
@@ -71,10 +73,10 @@ class BreedsListState extends Equatable {
   ];
 }
 
-/// Listado paginado de razas (scroll infinito).
+/// La lista de razas con scroll infinito.
 ///
-/// No es `autoDispose`: al volver del detalle la lista conserva sus páginas
-/// y su posición en vez de recargarse desde cero.
+/// No es `autoDispose` a propósito: cuando vuelves del detalle, la lista
+/// sigue donde la dejaste en vez de recargar todo.
 class BreedsListNotifier extends StateNotifier<BreedsListState> {
   BreedsListNotifier(this._getBreeds, {this.pageSize = ApiConstants.pageSize})
     : super(const BreedsListState());
@@ -82,8 +84,8 @@ class BreedsListNotifier extends StateNotifier<BreedsListState> {
   final GetBreedsUseCase _getBreeds;
   final int pageSize;
 
-  /// Carga la primera página. Idempotente: si ya hay datos o una carga en
-  /// curso, no hace nada (la splash y la lista pueden llamarla ambas).
+  /// Carga la primera página. La llaman tanto la splash como la lista, así
+  /// que si ya hay datos o ya va una carga en camino, no hace nada.
   Future<void> loadFirstPage() async {
     if (state.status == BreedsListStatus.loading ||
         state.status == BreedsListStatus.success) {
@@ -96,8 +98,8 @@ class BreedsListNotifier extends StateNotifier<BreedsListState> {
     await _fetchFirstPage();
   }
 
-  /// Pull-to-refresh: vuelve a la página 0 sin vaciar la lista mientras
-  /// carga. Si falla, conserva lo que había.
+  /// Para el pull to refresh. Pide de nuevo la página 0 sin vaciar la
+  /// lista mientras tanto, y si falla, deja lo que había.
   Future<void> refresh() async {
     if (state.items.isEmpty) {
       state = state.copyWith(status: BreedsListStatus.loading);
@@ -119,7 +121,8 @@ class BreedsListNotifier extends StateNotifier<BreedsListState> {
     state = result.fold(
       (f) => state.copyWith(isLoadingMore: false, loadMoreFailure: () => f),
       (page) {
-        // Por si la API reordena entre páginas: nunca duplicar una raza.
+        // Si la API llega a repetir una raza entre páginas, no la
+        // mostramos dos veces.
         final seen = state.items.map((b) => b.id).toSet();
         final fresh = page.items.where((b) => seen.add(b.id));
         return state.copyWith(

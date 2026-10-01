@@ -1,4 +1,5 @@
-import 'package:catbreeds/main_dev.dart' as dev;
+import 'package:catbreeds/app.dart';
+import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-/// `flutter run` sin `-t` arranca DEV.
-Future<void> main() => dev.main();
+void main() => runApp(const ProviderScope(child: CatbreedsApp()));

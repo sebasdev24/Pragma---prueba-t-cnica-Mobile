@@ -5,11 +5,12 @@ import 'package:catbreeds/core/network/dio_client.dart';
 import 'package:catbreeds/data/models/breed/breed_model.dart';
 import 'package:dio/dio.dart';
 
-/// Resultado crudo de una página: modelos + total del header.
+/// Lo que devuelve una página: las razas y el total que vino en el header.
 typedef BreedModelPage = ({List<BreedModel> items, int total});
 
-/// Habla con The Cat API. Lanza [FailureException] con el [Failure] ya
-/// tipado; el repositorio lo desenvuelve.
+/// La única clase que sabe de URLs y parámetros de The Cat API. Si algo
+/// falla, lanza una [FailureException] con el error ya clasificado y el
+/// repositorio se encarga de convertirla.
 abstract class BreedRemoteDataSource {
   Future<BreedModelPage> getBreeds({required int page, required int limit});
 
@@ -34,8 +35,6 @@ class BreedRemoteDataSourceImpl implements BreedRemoteDataSource {
     );
     final items = _parseList(response.data);
     final header = response.headers.value(ApiConstants.paginationCountHeader);
-    // Sin header no sabemos el total. Una página llena sugiere que puede
-    // haber otra; una incompleta, que era la última.
     final loaded = page * limit + items.length;
     final total =
         int.tryParse(header ?? '') ??
@@ -45,8 +44,6 @@ class BreedRemoteDataSourceImpl implements BreedRemoteDataSource {
 
   @override
   Future<List<BreedModel>> searchBreeds(String query) async {
-    // `attach_image=1` hace que la búsqueda devuelva el objeto `image`,
-    // igual que el listado. Sin él, cada card necesitaría otra request.
     final response = await _get(
       ApiConstants.breedsSearch,
       query: {'q': query, 'attach_image': 1},
@@ -76,7 +73,6 @@ class BreedRemoteDataSourceImpl implements BreedRemoteDataSource {
     if (data is! List) {
       throw const FailureException(ParsingFailure('Expected a JSON list'));
     }
-    // Un registro malformado se descarta; no invalida el resto.
     final models = <BreedModel>[];
     for (final item in data) {
       if (item is Map<String, dynamic> &&

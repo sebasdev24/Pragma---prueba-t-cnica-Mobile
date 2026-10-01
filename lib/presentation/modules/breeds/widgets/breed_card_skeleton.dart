@@ -3,10 +3,10 @@ import 'package:catbreeds/presentation/global/widgets/widgets.dart';
 import 'package:catbreeds/presentation/modules/breeds/widgets/breed_card.dart';
 import 'package:flutter/material.dart';
 
-/// Esqueleto de [BreedCard]: mismo contorno y proporciones, para que la
-/// lista no salte al llegar los datos.
+/// La versión "cargando" de [BreedCard]. Tiene la misma forma y tamaño
+/// para que la lista no salte cuando llegan los datos.
 ///
-/// No incluye su propio [AppShimmer]: lo pone la vista una sola vez.
+/// No trae su propio [AppShimmer]; la vista pone uno solo para todas.
 class BreedCardSkeleton extends StatelessWidget {
   const BreedCardSkeleton({super.key});
 

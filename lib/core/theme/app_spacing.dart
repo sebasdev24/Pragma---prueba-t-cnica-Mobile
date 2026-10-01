@@ -1,7 +1,8 @@
 import 'package:flutter/widgets.dart';
 
-/// Escala de espaciado (colección Dimension de Figma). Sin números mágicos:
-/// todo margen, padding y gap sale de aquí vía `context.spacing.*`.
+/// La escala de espacios del Figma. Cualquier margen,
+/// padding o separación sale de aquí con `context.spacing.*`, para no
+/// tener números sueltos por las vistas.
 class AppSpacing {
   const AppSpacing();
 
@@ -29,11 +30,11 @@ class AppSpacing {
   /// 56
   double get safe => 56;
 
-  /// Padding horizontal estándar de pantalla.
+  /// El margen lateral que llevan todas las pantallas.
   EdgeInsets get screen => EdgeInsets.symmetric(horizontal: lg);
 }
 
-/// Radios de esquina.
+/// Bordes.
 class AppRadius {
   const AppRadius();
 

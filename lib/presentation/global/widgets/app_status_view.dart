@@ -5,8 +5,9 @@ import 'package:flutter/material.dart';
 
 enum AppStatusTone { neutral, error }
 
-/// Estado vacío o de error: insignia con la silueta, título, texto y una
-/// acción. Una sola pieza para "sin resultados" y "sin conexión".
+/// Lo que se muestra cuando no hay nada o algo falló: la silueta, un
+/// título, un texto y un botón. La misma pieza sirve para "sin resultados"
+/// y para "sin conexión".
 class AppStatusView extends StatelessWidget {
   const AppStatusView({
     super.key,

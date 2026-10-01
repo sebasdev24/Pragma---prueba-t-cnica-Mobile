@@ -7,8 +7,6 @@ import 'package:catbreeds/domain/usecases/breed/get_breeds_usecase.dart';
 import 'package:catbreeds/domain/usecases/breed/search_breeds_usecase.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-/// DI del módulo breeds: DataSource → Repository → UseCase.
-/// En tests se sobreescribe [breedRepositoryProvider].
 final breedRemoteDataSourceProvider = Provider<BreedRemoteDataSource>((ref) {
   return BreedRemoteDataSourceImpl(ref.watch(dioClientProvider));
 });

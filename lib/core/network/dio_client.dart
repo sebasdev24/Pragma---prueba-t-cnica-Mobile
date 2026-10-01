@@ -4,8 +4,9 @@ import 'package:catbreeds/core/errors/failure.dart';
 import 'package:dio/dio.dart';
 import 'package:fpdart/fpdart.dart';
 
-/// Envoltorio de [Dio] que nunca lanza: traduce cualquier error de red a un
-/// [Failure] tipado. Los datasources solo ven `Either`.
+/// Una capa delgada sobre [Dio] que nunca lanza. Si la request falla,
+/// devuelve el [Failure] que corresponde; así los datasources no tienen que
+/// saber nada de `DioException`.
 class DioClient {
   final Dio _dio;
 
@@ -30,11 +31,9 @@ class DioClient {
     }
   }
 
-  /// Público para poder probar el mapeo sin levantar Dio.
+  /// Es pública y estática para poder probarla sin crear un Dio.
   static Failure mapDioError(DioException error) {
     switch (error.type) {
-      case DioExceptionType.cancel:
-        return const CancelledFailure();
       case DioExceptionType.connectionTimeout:
       case DioExceptionType.sendTimeout:
       case DioExceptionType.receiveTimeout:
@@ -50,6 +49,7 @@ class DioClient {
         return ServerFailure(message, statusCode: status);
       case DioExceptionType.badCertificate:
         return const ServerFailure('Bad certificate');
+      case DioExceptionType.cancel:
       case DioExceptionType.unknown:
         if (error.error is SocketException) {
           return NetworkFailure(error.message ?? 'Socket error');

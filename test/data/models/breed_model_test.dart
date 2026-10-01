@@ -21,30 +21,15 @@ void main() {
       expect(breed.imageUrl, 'https://cdn2.thecatapi.com/images/KWdLHmOqc.jpg');
     });
 
-    test('la API actual no trae intelligence/adaptability: quedan en null', () {
+    test('lee peso y altura en ambos sistemas', () {
       final breed = BreedModel.fromJson(abyssinianJson).toEntity();
 
-      expect(breed.intelligence, isNull);
-      expect(breed.adaptability, isNull);
-    });
-
-    test('respeta las escalas cuando la API sí las manda', () {
-      final breed = BreedModel.fromJson(legacyScoresJson).toEntity();
-
-      expect(breed.intelligence, 5);
-      expect(breed.adaptability, 4);
-    });
-
-    test('descarta escalas fuera de 1–5', () {
-      final json = {...legacyScoresJson, 'intelligence': 0, 'adaptability': 9};
-      final breed = BreedModel.fromJson(json).toEntity();
-
-      expect(breed.intelligence, isNull);
-      expect(breed.adaptability, isNull);
+      expect(breed.weightLb, '8-12');
+      expect(breed.heightIn, '10-12');
     });
 
     test('sin objeto image usa el CDN con reference_image_id', () {
-      final breed = BreedModel.fromJson(legacyScoresJson).toEntity();
+      final breed = BreedModel.fromJson(referenceOnlyJson).toEntity();
 
       expect(breed.imageUrl, 'https://cdn2.thecatapi.com/images/dN6eoeLjY.jpg');
     });
@@ -52,7 +37,7 @@ void main() {
     test('raza sin foto ni origen no rompe el parseo', () {
       final breed = BreedModel.fromJson(noImageJson).toEntity();
 
-      expect(breed.hasImage, isFalse);
+      expect(breed.imageUrl, isNull);
       expect(breed.origin, isNull);
       expect(breed.countryCode, isNull);
       expect(breed.history, isNull);

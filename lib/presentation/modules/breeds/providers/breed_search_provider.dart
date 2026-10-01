@@ -23,20 +23,22 @@ class BreedSearchState extends Equatable {
     this.failure,
   });
 
-  /// Hay texto en el buscador: la vista muestra resultados en vez de la
-  /// lista completa.
+  /// Hay algo escrito en el buscador, así que la vista muestra resultados
+  /// en vez de la lista completa.
   bool get isActive => query.isNotEmpty;
 
   @override
   List<Object?> get props => [query, status, results, failure];
 }
 
-/// Búsqueda por nombre contra `/v1/breeds/search`.
+/// La búsqueda por nombre contra `/v1/breeds/search`.
 ///
-/// - Debounce: no dispara una request por tecla.
-/// - Respuestas fuera de orden: cada búsqueda lleva un número; si al volver
-///   ya hay una más nueva, el resultado se descarta. Así "ben" nunca pisa a
-///   "beng" aunque llegue después.
+/// Espera a que el usuario deje de escribir antes de buscar (debounce), para
+/// no lanzar una request por cada tecla.
+///
+/// Además, cada búsqueda lleva un número. Si cuando llega la respuesta ya
+/// hay una búsqueda más nueva, la vieja se ignora. Así, si "ben" responde
+/// después que "beng", no pisa los resultados buenos.
 class BreedSearchNotifier extends StateNotifier<BreedSearchState> {
   BreedSearchNotifier(
     this._searchBreeds, {
@@ -68,7 +70,7 @@ class BreedSearchNotifier extends StateNotifier<BreedSearchState> {
     _timer = Timer(debounce, () => _run(query));
   }
 
-  /// Reintenta la última consulta sin esperar el debounce.
+  /// Vuelve a buscar lo mismo, sin esperar el debounce.
   Future<void> retry() async {
     if (!state.isActive) return;
     _timer?.cancel();

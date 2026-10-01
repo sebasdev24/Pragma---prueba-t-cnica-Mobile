@@ -2,9 +2,9 @@ import 'package:catbreeds/core/constants/app_images.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 
-/// Silueta del gato de la marca, teñida con [color].
-/// Si se pasa [eyeColor] se dibujan los ojos (splash); en íconos pequeños
-/// se omiten.
+/// La silueta del gato de la marca, pintada con [color]. Con [eyeColor]
+/// también lleva ojos (como en la splash); en tamaños pequeños no hacen
+/// falta.
 class CatMark extends StatelessWidget {
   const CatMark({
     super.key,
@@ -28,7 +28,7 @@ class CatMark extends StatelessWidget {
     final eyes = eyeColor;
     if (eyes == null) return ExcludeSemantics(child: silhouette);
 
-    // Coordenadas de los ojos en el viewBox 120×120 del SVG.
+    // Dónde van los ojos dentro del SVG, que mide 120×120.
     final s = size / 120;
     Widget eye(double cx) => Positioned(
       left: (cx - 3) * s,

@@ -4,14 +4,14 @@ import 'package:catbreeds/presentation/modules/breeds/providers/breed_search_pro
 import 'package:catbreeds/presentation/modules/breeds/providers/breeds_list_provider.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-/// Raza para el detalle.
+/// La raza que muestra el detalle.
 ///
-/// Si viene de la lista o de la búsqueda ya está en memoria y no se pide de
-/// nuevo. Solo se va a la red cuando se llega sin pasar por la lista (deep
-/// link `/breeds/:id` o restauración del sistema).
+/// Si llegaste desde la lista o la búsqueda, ya la tenemos en memoria y no
+/// hay que pedirla otra vez. Solo vamos a la red cuando se entra directo,
+/// por ejemplo con un deep link a `/breeds/:id`.
 ///
-/// Si falla, el error es el `Failure` tipado, así la vista puede mostrar su
-/// `userMessage`.
+/// Si falla, lanzamos el `Failure` tal cual para que la vista pueda mostrar
+/// su `userMessage`.
 final breedDetailProvider = FutureProvider.autoDispose.family<Breed, String>((
   ref,
   id,

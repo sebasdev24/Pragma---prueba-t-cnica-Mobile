@@ -19,16 +19,20 @@ void main() {
     repository = MockBreedRepository();
   });
 
-  // Fotos en null: en pruebas no hay red ni path_provider para la caché.
+  // Sin fotos, porque en las pruebas no hay red ni caché en disco.
   final breeds = [
-    fakeBreed('abys', name: 'Abyssinian', intelligence: 5),
-    fakeBreed('beng', name: 'Bengal', origin: null, countryCode: null),
+    fakeBreed('abys', name: 'Abyssinian'),
+    fakeBreed(
+      'beng',
+      name: 'Bengal',
+      origin: null,
+      countryCode: null,
+      weightKg: null,
+    ),
   ];
 
   group('BreedsScreen', () {
-    testWidgets('muestra las cards con nombre, origen e inteligencia', (
-      tester,
-    ) async {
+    testWidgets('muestra las cards con nombre, origen y peso', (tester) async {
       when(
         () => repository.getBreeds(page: 0, limit: any(named: 'limit')),
       ).thenAnswer(
@@ -42,20 +46,20 @@ void main() {
       await tester.pumpAndSettle();
 
       expect(find.text('Catbreeds'), findsOneWidget);
-      expect(find.text('2 RAZAS · THE CAT API'), findsOneWidget);
+      expect(find.text('2 BREEDS · THE CAT API'), findsOneWidget);
       expect(find.byType(BreedCard), findsNWidgets(2));
       expect(find.text('Abyssinian'), findsOneWidget);
       expect(find.text('Egypt'), findsOneWidget);
-      expect(find.text('5/5'), findsOneWidget);
-      // Bengal no trae origen ni inteligencia: estados de "sin dato".
-      expect(find.text('Desconocido'), findsOneWidget);
-      expect(find.text('Sin dato'), findsOneWidget);
+      expect(find.text('3–5 kg'), findsOneWidget);
+      // Bengal viene sin origen ni peso, así que se ve el "No data".
+      expect(find.text('Unknown'), findsOneWidget);
+      expect(find.text('No data'), findsOneWidget);
       await tester.scrollUntilVisible(
-        find.text('ESO ES TODO · 2 RAZAS'),
+        find.text("THAT'S ALL · 2 BREEDS"),
         300,
         scrollable: find.byType(Scrollable).first,
       );
-      expect(find.text('ESO ES TODO · 2 RAZAS'), findsOneWidget);
+      expect(find.text("THAT'S ALL · 2 BREEDS"), findsOneWidget);
     });
 
     testWidgets('error de red en la primera página ofrece reintentar', (
@@ -71,15 +75,18 @@ void main() {
       );
       await tester.pumpAndSettle();
 
-      expect(find.text('No pudimos cargar las razas'), findsOneWidget);
-      expect(find.textContaining('Revisa tu conexión'), findsOneWidget);
+      expect(find.text("We couldn't load the breeds"), findsOneWidget);
+      expect(
+        find.textContaining('Check your internet connection'),
+        findsOneWidget,
+      );
 
       when(
         () => repository.getBreeds(page: 0, limit: any(named: 'limit')),
       ).thenAnswer(
         (_) async => Right(BreedPage(items: breeds, page: 0, total: 2)),
       );
-      await tester.tap(find.text('Reintentar'));
+      await tester.tap(find.text('Try again'));
       await tester.pumpAndSettle();
 
       expect(find.byType(BreedCard), findsNWidgets(2));
@@ -107,8 +114,8 @@ void main() {
       await tester.pump(const Duration(milliseconds: 400));
       await tester.pumpAndSettle();
 
-      expect(find.text('Sin coincidencias'), findsOneWidget);
-      await tester.tap(find.text('Limpiar búsqueda'));
+      expect(find.text('No matches'), findsOneWidget);
+      await tester.tap(find.text('Clear search'));
       await tester.pumpAndSettle();
       expect(find.byType(BreedCard), findsNWidgets(2));
     });
@@ -129,12 +136,16 @@ void main() {
       await tester.pumpAndSettle();
 
       expect(find.text('Abyssinian'), findsNWidgets(2)); // AppBar + título
-      expect(find.text('PAÍS DE ORIGEN'), findsOneWidget);
-      expect(find.text('INTELIGENCIA'), findsOneWidget);
-      expect(find.text('ADAPTABILIDAD'), findsOneWidget);
-      expect(find.text('ESPERANZA DE VIDA'), findsOneWidget);
-      expect(find.text('12-15 años'), findsOneWidget);
-      expect(find.text('Sin dato'), findsNWidgets(2));
+      expect(find.text('ORIGIN'), findsOneWidget);
+      expect(find.text('WEIGHT'), findsOneWidget);
+      expect(find.text('HEIGHT'), findsOneWidget);
+      expect(find.text('LIFE SPAN'), findsOneWidget);
+      expect(find.text('3–5 kg'), findsOneWidget);
+      expect(find.text('7–11 lb'), findsOneWidget);
+      expect(find.text('25–30 cm'), findsOneWidget);
+      expect(find.text('10–12 in'), findsOneWidget);
+      expect(find.text('12–15 years'), findsOneWidget);
+      expect(find.text('No data'), findsNothing);
     });
 
     testWidgets('la foto queda fija: solo la ficha hace scroll', (

@@ -26,10 +26,10 @@ BreedsScreen ──ref.read──▶ BreedsListNotifier.loadMore()
                                ▼                              │
                   DioClient.get ── Either<Failure, Response> ─┘
                                │
-            RetryInterceptor → ApiKeyInterceptor → TalkerDioLogger → The Cat API
+            ApiKeyInterceptor → LogInterceptor (solo debug) → The Cat API
 ```
 
-`DioClient` nunca lanza: devuelve `Left(Failure)`. El datasource, que necesita devolver modelos y no `Either`, envuelve ese `Failure` en `FailureException`. El repositorio lo desenvuelve **sin perder el tipo**: `NetworkFailure` sigue siendo `NetworkFailure` y la UI muestra "Revisa tu conexión…" en lugar de un texto genérico.
+`DioClient` nunca lanza: devuelve `Left(Failure)`. El datasource, que necesita devolver modelos y no `Either`, envuelve ese `Failure` en `FailureException`. El repositorio lo desenvuelve **sin perder el tipo**: `NetworkFailure` sigue siendo `NetworkFailure` y la UI muestra "Check your internet connection…" en lugar de un texto genérico.
 
 ## Estado (Riverpod)
 
@@ -49,18 +49,18 @@ Los tokens espejan las variables del archivo de Figma:
 - **Color:** `AppPalette` (primitivos) → `AppColorsExtension` (semánticos: `background`, `surface`, `sunken`, `foreground*`, `border*`, `accent*`, `danger*`). Solo tema claro. Uso: `context.colors.accent`.
 - **Tipografía:** `context.typography.display.{xl,lg,md,italic}` (Fraunces), `system.{headline,body,callout,subhead,caption}` (Geist) y `mono.label` (Geist Mono).
 - **Espaciado y radios:** `context.spacing.{sx…safe}` y `context.radius.{xs…full}`.
-- **Componentes globales** (`presentation/global/widgets/`): `AppSearchField` (adaptativo), `AppNetworkImage`, `AppShimmer` + `AppShimmerBox`, `RatingMeter`, `StatTile`, `AppStatusView`, `AppChip`, `AppLabel`, botones y `CatMark`. Las vistas los usan en vez de recrearlos.
+- **Componentes globales** (`presentation/global/widgets/`): `AppSearchField` (adaptativo), `AppNetworkImage`, `AppShimmer` + `AppShimmerBox`, `StatTile`, `AppStatusView`, `AppChip`, `AppLabel`, botones y `CatMark`. Las vistas los usan en vez de recrearlos.
 
-## Entornos
+## Configuración
 
-`main_dev.dart` y `main_prod.dart` llaman a `bootstrap(EnvType.x)`. `AppConfig` expone `baseUrl`, `catApiKey` y `enableDebugTools`, leídos en compilación de `.env.dev` / `.env.prod` con Envied (ofuscados). `build_runner` no detecta cambios en los `.env`: tras editar uno, `dart run build_runner clean` y luego `build --delete-conflicting-outputs`.
+Un solo entorno. `Env` expone `baseUrl` y `catApiKey`, leídos en compilación de `.env` con Envied (ofuscados); los logs de red solo se activan en debug. `build_runner` no detecta cambios en el `.env`: tras editarlo, `dart run build_runner clean` y luego `build --delete-conflicting-outputs`.
 
 ## Pruebas
 
 ```
 test/
-├── core/network/        mapeo DioException → Failure, política de reintentos
-├── data/                modelo (campos ausentes, escalas fuera de rango),
+├── core/network/        mapeo DioException → Failure
+├── data/                modelo (campos ausentes, unidades métricas e imperiales),
 │                        datasource (paginación, registros malformados), repositorio
 ├── domain/usecases/     búsqueda vacía no llega a la red
 ├── presentation/modules/ notifiers: paginación, deduplicado, errores, debounce,

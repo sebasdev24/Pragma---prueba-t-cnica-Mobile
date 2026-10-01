@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 
-/// Nivel 1 – Primitivos. Valores crudos del diseño en Figma
-/// ("Catbreeds — Prueba técnica Pragma", colección Color · Light).
+/// Los colores tal cual están en el Figma (colección Color · Light).
 ///
-/// La UI nunca los usa directo: pasa por [AppColorsExtension].
+/// Ninguna vista los usa directamente: siempre pasan por
+/// [AppColorsExtension], que les da un nombre según su uso.
 class AppPalette {
   const AppPalette._();
 

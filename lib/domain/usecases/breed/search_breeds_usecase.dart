@@ -7,7 +7,7 @@ class SearchBreedsUseCase {
   final BreedRepository repository;
   SearchBreedsUseCase(this.repository);
 
-  /// Una consulta vacía no llega a la red: no hay nada que buscar.
+  /// Si la búsqueda está vacía no vale la pena ir a la red.
   Future<Either<Failure, List<Breed>>> call(String query) async {
     final q = query.trim();
     if (q.isEmpty) return const Right([]);

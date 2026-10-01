@@ -61,7 +61,7 @@ void main() {
       async.elapse(debounce);
       async.flushMicrotasks();
 
-      // Llega la respuesta de "sia" después de la de "siam".
+      // La respuesta de "sia" llega tarde, después de la de "siam".
       slow.complete(Right([fakeBreed('pers', name: 'Persian')]));
       async.flushMicrotasks();
 

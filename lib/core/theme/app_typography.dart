@@ -1,14 +1,9 @@
 import 'package:catbreeds/core/constants/app_fonts.dart';
 import 'package:flutter/material.dart';
 
-/// Escala tipográfica. Espeja los estilos de texto del archivo de Figma.
-///
-/// - `context.typography.display.*`: Fraunces, títulos.
-/// - `context.typography.system.*`: Geist, cuerpo y controles.
-/// - `context.typography.mono.label`: Geist Mono, rótulos en mayúsculas.
-///
-/// Los estilos no llevan color: lo pone quien los usa con `copyWith`, o lo
-/// hereda del `DefaultTextStyle` del tema.
+/// Los estilos de texto del Figma: `display` (Fraunces) para títulos,
+/// `system` (Geist) para el texto y los controles, y `mono.label` (Geist
+/// Mono) para los rótulos en mayúsculas.
 class AppTypography {
   const AppTypography();
 
@@ -37,7 +32,7 @@ class DisplayFont {
   TextStyle get md =>
       _base.copyWith(fontSize: 24, height: 1.15, letterSpacing: -0.24);
 
-  /// 18–20 · Display/Italic (subtítulos editoriales).
+  /// 18 a 20 · Display/Italic (los subtítulos en cursiva).
   TextStyle get italic => _base.copyWith(
     fontSize: 19,
     height: 1.3,
@@ -86,7 +81,7 @@ class SystemFont {
 class MonoFont {
   const MonoFont();
 
-  /// 11 · Mono/Label. El texto se pasa ya en mayúsculas desde la vista.
+  /// 11 · Mono/Label
   TextStyle get label => const TextStyle(
     fontFamily: AppFonts.mono,
     fontWeight: FontWeight.w500,

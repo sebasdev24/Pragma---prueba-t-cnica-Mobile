@@ -1,95 +1,146 @@
-# Catbreeds
+# Prueba Técnica de Flutter - Catbreeds
 
-Catálogo de razas de gato sobre [The Cat API](https://developers.thecatapi.com/). Prueba técnica de desarrollo móvil (Flutter, iOS y Android).
+## Descripción
+
+Este repositorio contiene mi solución a la prueba técnica de desarrollo móvil de **Pragma**. Es una aplicación Flutter para iOS y Android que muestra un catálogo de razas de gato consumiendo [The Cat API](https://developers.thecatapi.com/), con splash, listado con búsqueda y vista de detalle.
+
+Diseño en Figma: [Catbreeds — Prueba técnica Pragma](https://www.figma.com/design/qwf9mfXFvY4A6ngNtPgNe3/Catbreeds---Prueba-t%C3%A9cnica-Pragma?node-id=2-8&t=zPttcsc2JBRvzaJN-1).
+
+## Capturas
 
 | Splash | Lista | Búsqueda | Detalle |
-|---|---|---|---|
-| Continúa el splash nativo y precarga la primera página | Cards con nombre, "Más", foto, país de origen e inteligencia | Por nombre en inglés, con debounce | Foto fija; solo la ficha hace scroll |
+|:---:|:---:|:---:|:---:|
+| <img src="docs/screenshots/splash.png" width="200" alt="Splash"> | <img src="docs/screenshots/list.png" width="200" alt="Lista de razas"> | <img src="docs/screenshots/search.png" width="200" alt="Búsqueda"> | <img src="docs/screenshots/detail.png" width="200" alt="Detalle de la raza"> |
 
-Diseño en Figma: [Catbreeds — Prueba técnica Pragma](https://www.figma.com/design/qwf9mfXFvY4A6ngNtPgNe3).
+<p align="center"><img src="docs/screenshots/demo.gif" width="280" alt="Recorrido por la app: splash, lista, búsqueda y detalle"></p>
 
-## Cómo correrla
+## Instalación
 
-Requisitos: Flutter 3.38 (Dart 3.10) o superior.
+Si solo quieres probarla en Android, el APK está en la sección **Releases** de este repositorio y no necesita configurar nada.
+
+Para compilarla tú mismo necesitas Flutter 3.38 (Dart 3.10) o superior. Luego sigue estos pasos:
+
+1. Clona este repositorio en tu máquina local.
+2. En la terminal, navega hasta la carpeta del proyecto.
+3. Copia la plantilla de variables de entorno y pega la API key de The Cat API que viene en el enunciado:
+   ```bash
+   cp .env.example .env
+   ```
+4. Instala las dependencias y genera el código (Envied):
+   ```bash
+   flutter pub get
+   dart run build_runner build --delete-conflicting-outputs
+   ```
+5. Ejecuta `flutter run` para iniciar la aplicación.
+
+(El paso 3 es obligatorio: sin la key la API responde `403`. La key se compila ofuscada con Envied y el `.env` no se versiona. Si editas el `.env`, corre antes `dart run build_runner clean`, porque `build_runner` no detecta esos cambios).
+
+Para correr los lints y las pruebas:
 
 ```bash
-# 1. Variables de entorno: copia la plantilla y pega la API key del enunciado
-cp .env.example .env.dev
-cp .env.example .env.prod      # con ENABLE_DEBUG_TOOLS=false
-
-# 2. Dependencias y código generado (Envied + traducciones)
-flutter pub get
-dart run build_runner build --delete-conflicting-outputs
-
-# 3. Ejecutar
-flutter run -t lib/main_dev.dart
+flutter analyze
+flutter test
 ```
 
-La API responde `403` sin la key, así que el paso 1 es obligatorio. La key se compila ofuscada (Envied) y los `.env.*` no se versionan. `build_runner` no detecta cambios en los `.env`: si editas uno, corre antes `dart run build_runner clean`.
+## Características
 
-```bash
-flutter analyze        # lints
-flutter test           # 41 pruebas: modelo, red, repositorio, notifiers y widgets
-```
+La aplicación incluye las siguientes características:
 
-## Requisitos del enunciado
+**Splash:**
 
-| Requisito | Dónde |
-|---|---|
-| Consumir `/v1/breeds` con `x-api-key` | `ApiKeyInterceptor`, `BreedRemoteDataSource` |
-| Splash con título e imagen de gato | `SplashScreen` + splash nativo (`flutter_native_splash`) |
-| Landing con cards: nombre, "Más…", imagen, país de origen, inteligencia | `BreedsScreen`, `BreedCard` |
-| Buscar la raza en inglés | `/v1/breeds/search` con debounce, `BreedSearchNotifier` |
-| Detalle: imagen fija y solo la info con scroll | `BreedDetailScreen`: la foto está fuera del `SingleChildScrollView` |
-| Detalle: descripción, país, inteligencia, adaptabilidad, esperanza de vida | Ficha 2×2 (`StatTile`) + temperamento e historia |
-| Componentes nativos de cada plataforma | `CupertinoSearchTextField` y "Cancelar" en iOS, `TextField` Material en Android; `RefreshIndicator.adaptive`, `CircularProgressIndicator.adaptive`, `BackButton`, transiciones y física de scroll nativas |
+- Continúa el splash nativo (`flutter_native_splash`) con el título de la app y una imagen de gato.
+- Mientras se muestra, precarga la primera página de razas para que el listado abra con datos.
+
+**Listado de razas (landing):**
+
+- Cards con el nombre de la raza, el botón "More" para ir al detalle, la foto, el país de origen y el peso.
+- Scroll infinito con paginación (`limit=20`, el total se lee del header `pagination-count`). Si falla una página, lo ya cargado se conserva y solo el pie ofrece reintentar.
+- Pull to refresh y skeletons de carga.
+
+**Búsqueda:**
+
+- Búsqueda por nombre de la raza en inglés contra la API (`/v1/breeds/search`), con debounce de 350 ms.
+- Las respuestas que llegan fuera de orden se descartan (si "ben" responde después que "beng", se ignora).
+
+**Detalle de la raza:**
+
+- La imagen queda fija en la parte superior y solo la información hace scroll. Al subir, el texto se desvanece al pasar por debajo de la foto.
+- Muestra la descripción, el país de origen, el peso, la altura, la esperanza de vida y el temperamento.
+
+**Componentes nativos por plataforma:**
+
+- En iOS usa `CupertinoSearchTextField` con el botón "Cancel"; en Android, el `TextField` de Material.
+- `RefreshIndicator.adaptive`, `CircularProgressIndicator.adaptive`, `BackButton`, transiciones y física de scroll propias de cada plataforma.
 
 ## Un hallazgo sobre la API
 
-Hoy `GET /v1/breeds` **ya no devuelve `intelligence` ni `adaptability`**, aunque el enunciado pide mostrarlos (verificado con la key del enunciado). La app no inventa valores:
+Hoy The Cat API **ya no devuelve `intelligence` ni `adaptability`**, aunque el enunciado pide mostrarlos. Lo verifiqué con la key del enunciado en `/v1/breeds`, `/v1/breeds/{id}`, `/v1/breeds/search` y `/v1/images`: ninguna raza trae esas escalas.
 
-- Si la API los manda (escala 1–5), se muestran como escala.
-- Si no, la escala aparece vacía con **"Sin dato"** y el lector de pantalla lo anuncia igual.
+Ejemplo de respuesta:
+    {
+        "id": "acur",
+        "name": "American Curl",
+        "species_id": "1",
+        "life_span": "12-16",
+        "temperament": "Affectionate, Curious, Intelligent, Interactive, Lively, Playful, Social",
+        "origin": "United States",
+        "country_codes": "US",
+        "country_code": "US",
+        "description": "Medium-sized cat with distinctive backward-curling ears, elegant body, and silky coat. Known for its kitten-like personality that persists into adulthood.",
+        "bred_for": null,
+        "perfect_for": null,
+        "breed_group": "Short/Long-hair",
+        "history": "Originated in 1981 in Lakewood, California, when a stray black kitten with unusual curled ears was found. The curl is caused by a dominant gene. Recognized by major cat registries and known for maintaining a kitten-like personality throughout life.",
+        "reference_image_id": "ZZmFRKWZZ",
+        "weight": {
+            "imperial": "7-11",
+            "metric": "3.2-5"
+        },
+        "height": {
+            "imperial": "9-12",
+            "metric": "23-30"
+        },
+        "image": {
+            "id": "ZZmFRKWZZ",
+            "url": "https://cdn2.thecatapi.com/images/ZZmFRKWZZ.jpg",
+            "width": 1980,
+            "height": 1355
+        }
+    }
 
-El parser valida el rango (1–5); si la API vuelve a mandar esos campos, se verán sin tocar la UI. Está cubierto en `test/data/models/breed_model_test.dart`.
+Para no mostrar "No data" en todas las cards, la app usa datos que sí vienen en todas las razas y mantiene la estructura visual del wireframe:
 
-## Arquitectura
+| Donde el enunciado pide | La app muestra |
+|---|---|
+| Inteligencia (card) | Peso en kg |
+| Inteligencia (detalle) | Peso en kg, con libras debajo |
+| Adaptabilidad (detalle) | Altura en cm, con pulgadas debajo |
 
-Clean Architecture en cuatro capas, con la misma estructura de carpetas y convenciones que uso en producción:
+## Notas Adicionales
+
+He usado una arquitectura limpia (Clean Architecture) en cuatro capas, escalable y con la misma estructura que uso en proyectos en producción:
 
 ```
 lib/
-├── main_dev.dart · main_prod.dart · bootstrap.dart · app.dart
-├── core/          config (Envied), constants, di, errors, extensions,
-│                  network (Dio + interceptores), router, theme, utils
-├── domain/        entities · repositories (contratos) · usecases
-├── data/          datasources · models (DTO) · repositories (impl)
-├── presentation/
-│   ├── global/widgets/        sistema de diseño (componentes reutilizables)
-│   └── modules/
-│       ├── splash/views/
-│       └── breeds/{providers,views,widgets}/
-└── l10n/          ARB en español (por defecto) e inglés
+├── core/          configuración (Envied), constantes, DI, errores, red, rutas y tema
+├── domain/        entidades, contratos de repositorio y casos de uso
+├── data/          datasources, modelos (DTO) e implementación de repositorios
+└── presentation/  sistema de diseño (widgets globales) y módulos splash y breeds
 ```
 
-- **Flujo de datos:** DataSource → Repository → UseCase → Provider (Riverpod) → UI. La DI vive en `core/di/breed_dependencies.dart` y en las pruebas se sobreescribe `breedRepositoryProvider`.
-- **Errores:** nada lanza excepciones por encima de `data`. `DioClient` traduce cada error a un `Failure` tipado (`NetworkFailure`, `ServerFailure`, `ParsingFailure`…) y todo viaja como `Either<Failure, T>` (fpdart). Cada `Failure` sabe su `userMessage`.
-- **Red:** `RetryInterceptor` (solo GET, backoff exponencial, no reintenta 4xx) → `ApiKeyInterceptor` → `TalkerDioLogger` (solo en dev).
+- **Flujo de datos:** DataSource → Repository → UseCase → Provider (Riverpod) → UI.
+- **Manejo de errores:** nada lanza excepciones por encima de la capa `data`. `DioClient` traduce cada error a un `Failure` tipado (red, servidor, parseo…) y todo viaja como `Either<Failure, T>` con fpdart. Cada estado de error tiene su botón de reintentar.
+- **Imágenes:** las originales pesan hasta 6 MB, así que se decodifican al ancho real en pantalla, con caché en disco y una imagen de respaldo para las razas sin foto.
+- **Estado persistente:** al volver del detalle, el listado conserva las páginas cargadas y la posición del scroll.
+- **Sistema de diseño:** colores, tipografía (Fraunces, Geist y Geist Mono) y espaciado en tokens que reflejan las variables de Figma.
+- **Pruebas:** unitarias y de widgets para el modelo, la capa de red, el repositorio, los notifiers y las pantallas, con mocktail.
 
-Más detalle en [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md).
+**Stack:** Flutter 3.38 · Riverpod 2 · go_router · Dio · fpdart · Envied · cached_network_image · flutter_svg · mocktail.
 
-## Decisiones
+Más detalle de la arquitectura en [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md).
 
-- **Paginación con scroll infinito** (`limit=20`, total leído del header `pagination-count`). La primera página se pide durante la splash, así la lista abre con datos. Un fallo al paginar no borra lo cargado: solo el pie ofrece reintentar.
-- **Búsqueda contra la API** (`/breeds/search?attach_image=1`), no filtrado local. Debounce de 350 ms, y cada búsqueda lleva un número de generación: si "ben" responde después que "beng", se descarta. Hay prueba para ese caso.
-- **Imágenes:** las originales pesan 1–6 MB y miden hasta 4000 px. Se decodifican al ancho real en pantalla (`memCacheWidth`), con caché en disco y un fallback de marca para las 41 razas sin foto.
-- **Estado de la lista persistente:** el provider no es `autoDispose`, así que al volver del detalle se conservan las páginas y la posición. El detalle reutiliza la raza ya cargada y solo va a la red en un deep link (`/breeds/:id`).
-- **Sistema de diseño:** tokens en dos niveles (`AppPalette` → `AppColorsExtension`), tipografía (Fraunces, Geist y Geist Mono empaquetadas) y espaciado, espejo de las variables de Figma. Las vistas no usan colores ni tamaños sueltos.
-- **Skeletons:** un solo `AppShimmer` por vista y un único degradado; cada bloque pinta su porción, así brillan en fase. Respeta "reducir movimiento".
-- **Accesibilidad:** escalas con etiqueta semántica ("Inteligencia: 4 de 5"), títulos marcados como encabezado, fotos con descripción y botón "Más" con nombre ("Ver más sobre Bengal").
+Espero que encuentres mi solución satisfactoria. Estoy abierto a cualquier feedback.
 
-## Stack
+## Contacto
 
-Flutter 3.38 · Riverpod 2 · go_router · Dio · fpdart · Envied · cached_network_image · flutter_svg · talker · mocktail.
-
-Fuentes: Fraunces, Geist y Geist Mono (SIL Open Font License).
+Si tienes alguna pregunta o comentario sobre mi solución, no dudes en contactarme a través de sagudeloalvarez@gmail.com.

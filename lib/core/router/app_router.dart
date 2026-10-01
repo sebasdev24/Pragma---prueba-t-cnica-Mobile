@@ -5,8 +5,8 @@ import 'package:catbreeds/presentation/modules/splash/views/splash_screen.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
-/// Rutas de la app. Las transiciones son las nativas de cada plataforma
-/// (deslizar en iOS con gesto de volver, zoom/fade en Android).
+/// Las rutas de la app. No definimos transiciones propias: cada plataforma
+/// usa la suya (deslizar con gesto de volver en iOS, zoom en Android).
 final appRouterProvider = Provider<GoRouter>((ref) {
   return GoRouter(
     initialLocation: AppRoutes.splash,

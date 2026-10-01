@@ -4,8 +4,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
-/// Construye el `ThemeData` de la app a partir de los tokens. Solo existe
-/// tema claro.
+/// Solo existe el tema claro para fines de la prueba
 class AppTheme {
   const AppTheme._();
 

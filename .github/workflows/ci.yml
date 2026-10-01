@@ -26,17 +26,13 @@ jobs:
       - name: Get dependencies
         run: flutter pub get
 
-      # Envied necesita los .env para generar código. La key sale del secret
-      # CAT_API_KEY; las pruebas no llaman a la red, así que vacía también
-      # compila.
-      - name: Create environment files
+      # Envied necesita un .env para generar el código. La key sale del
+      # secret CAT_API_KEY, pero si está vacío también compila, porque las
+      # pruebas no salen a la red.
+      - name: Create .env
         run: |
-          for env in dev prod; do
-            echo "BASE_URL=https://api.thecatapi.com/v1" > .env.$env
-            echo "CAT_API_KEY=${{ secrets.CAT_API_KEY }}" >> .env.$env
-          done
-          echo "ENABLE_DEBUG_TOOLS=true" >> .env.dev
-          echo "ENABLE_DEBUG_TOOLS=false" >> .env.prod
+          echo "BASE_URL=https://api.thecatapi.com/v1" > .env
+          echo "CAT_API_KEY=${{ secrets.CAT_API_KEY }}" >> .env
 
       - name: Generate code
         run: dart run build_runner build --delete-conflicting-outputs

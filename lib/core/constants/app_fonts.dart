@@ -1,8 +1,7 @@
-/// Familias tipográficas empaquetadas en `assets/fonts/`.
-///
-/// - [display]: Fraunces. Títulos y nombres de raza.
-/// - [system]: Geist. Cuerpo de texto y controles.
-/// - [mono]: Geist Mono. Etiquetas en mayúsculas (eyebrows, rótulos de datos).
+/// Las tres fuentes que vienen empaquetadas en `assets/fonts/`:
+/// Fraunces ([display]) para títulos y nombres de raza, Geist ([system])
+/// para el texto y los controles, y Geist Mono ([mono]) para los rótulos
+/// en mayúsculas.
 class AppFonts {
   const AppFonts._();
 

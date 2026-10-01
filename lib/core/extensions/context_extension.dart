@@ -1,14 +1,14 @@
 import 'package:catbreeds/core/theme/app_colors_extension.dart';
 import 'package:catbreeds/core/theme/app_spacing.dart';
 import 'package:catbreeds/core/theme/app_typography.dart';
-import 'package:catbreeds/l10n/app_localizations.dart';
 import 'package:flutter/material.dart';
 
-/// Atajos al sistema de diseño desde el `BuildContext`.
+/// Para escribir `context.colors.accent` en vez de buscar el tema a mano
+/// en cada widget.
 extension ThemeContextExtension on BuildContext {
   ThemeData get theme => Theme.of(this);
 
-  /// Tokens de color semánticos.
+  /// Los colores de la app por su uso (fondo, texto, acento...).
   AppColorsExtension get colors => theme.extension<AppColorsExtension>()!;
 
   AppTypography get typography => const AppTypography();
@@ -17,9 +17,7 @@ extension ThemeContextExtension on BuildContext {
 
   AppRadius get radius => const AppRadius();
 
-  AppLocalizations get l10n => AppLocalizations.of(this);
-
-  /// iOS y macOS usan controles Cupertino; el resto, Material.
+  /// En iOS y macOS pintamos controles Cupertino; en el resto, Material.
   bool get isCupertino => switch (theme.platform) {
     TargetPlatform.iOS || TargetPlatform.macOS => true,
     _ => false,

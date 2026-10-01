@@ -3,19 +3,19 @@ import 'package:catbreeds/domain/entities/breed.dart';
 import 'package:catbreeds/domain/entities/breed_page.dart';
 import 'package:fpdart/fpdart.dart';
 
-/// Contrato del catálogo de razas. Nunca lanza: todo error vuelve como
-/// [Failure].
+/// Lo que la app necesita del catálogo de razas. Ningún método lanza: si
+/// algo sale mal, vuelve un [Failure].
 abstract class BreedRepository {
-  /// Listado paginado. `page` empieza en 0.
+  /// El listado, por páginas. La primera es la 0.
   Future<Either<Failure, BreedPage>> getBreeds({
     required int page,
     required int limit,
   });
 
-  /// Búsqueda por nombre (en inglés, como la API).
+  /// Busca por nombre. Los nombres están en inglés, como en la API.
   Future<Either<Failure, List<Breed>>> searchBreeds(String query);
 
-  /// Detalle de una raza. Sirve cuando se llega al detalle sin pasar por
-  /// la lista (deep link o restauración de estado).
+  /// Una raza por su id. Solo hace falta cuando se abre el detalle sin
+  /// pasar por la lista, por ejemplo con un deep link.
   Future<Either<Failure, Breed>> getBreedById(String id);
 }

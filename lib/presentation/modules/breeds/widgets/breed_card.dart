@@ -1,18 +1,22 @@
+import 'package:catbreeds/core/constants/app_strings.dart';
 import 'package:catbreeds/core/extensions/context_extension.dart';
 import 'package:catbreeds/domain/entities/breed.dart';
 import 'package:catbreeds/presentation/global/widgets/widgets.dart';
 import 'package:flutter/material.dart';
 
-/// Card de la lista (Figma: "Breed Card"). Nombre + "Más", foto, país de
-/// origen e inteligencia. Toda la card navega al detalle; "Más" es el
-/// atajo visible que pide el wireframe.
+/// La card de cada raza (la "Breed Card" del Figma): nombre, botón "More",
+/// foto, país de origen y peso. Se puede tocar toda la card; el "More" está
+/// porque el wireframe lo pide.
+///
+/// El wireframe mostraba la inteligencia, pero la API ya no la manda, así
+/// que en su lugar va el peso, que sí viene en todas las razas.
 class BreedCard extends StatelessWidget {
   const BreedCard({super.key, required this.breed, required this.onTap});
 
   final Breed breed;
   final VoidCallback onTap;
 
-  /// Proporción de la foto en el diseño (337 × 236).
+  /// La foto mantiene la proporción del diseño (337 × 236).
   static const photoAspectRatio = 337 / 236;
 
   static String heroTag(String id) => 'breed-photo-$id';
@@ -20,7 +24,6 @@ class BreedCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final colors = context.colors;
-    final l10n = context.l10n;
     final radius = BorderRadius.circular(context.radius.xl);
 
     return Material(
@@ -67,8 +70,8 @@ class BreedCard extends StatelessWidget {
                     ),
                     SizedBox(width: context.spacing.base),
                     AppPillButton(
-                      label: l10n.more,
-                      semanticLabel: l10n.moreAbout(breed.name),
+                      label: AppStrings.more,
+                      semanticLabel: AppStrings.moreAbout(breed.name),
                       onPressed: onTap,
                     ),
                   ],
@@ -80,8 +83,8 @@ class BreedCard extends StatelessWidget {
                   tag: heroTag(breed.id),
                   child: AppNetworkImage(
                     url: breed.imageUrl,
-                    semanticLabel: l10n.photoOf(breed.name),
-                    fallbackLabel: l10n.noPhoto,
+                    semanticLabel: AppStrings.photoOf(breed.name),
+                    fallbackLabel: AppStrings.noPhoto,
                   ),
                 ),
               ),
@@ -97,17 +100,7 @@ class BreedCard extends StatelessWidget {
                   children: [
                     Expanded(child: _Origin(breed: breed)),
                     SizedBox(width: context.spacing.md),
-                    Column(
-                      crossAxisAlignment: CrossAxisAlignment.end,
-                      children: [
-                        AppLabel(l10n.intelligenceLabel),
-                        SizedBox(height: context.spacing.md),
-                        RatingMeter(
-                          value: breed.intelligence,
-                          label: l10n.intelligenceLabel,
-                        ),
-                      ],
-                    ),
+                    _Weight(breed: breed),
                   ],
                 ),
               ),
@@ -115,6 +108,31 @@ class BreedCard extends StatelessWidget {
           ),
         ),
       ),
+    );
+  }
+}
+
+class _Weight extends StatelessWidget {
+  const _Weight({required this.breed});
+
+  final Breed breed;
+
+  @override
+  Widget build(BuildContext context) {
+    final colors = context.colors;
+    final weight = breed.weightKg;
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.end,
+      children: [
+        AppLabel(AppStrings.weightLabel),
+        SizedBox(height: context.spacing.base),
+        Text(
+          weight == null ? AppStrings.noData : AppStrings.kilograms(weight),
+          style: context.typography.system.callout.copyWith(
+            color: weight == null ? colors.foregroundSubtle : colors.foreground,
+          ),
+        ),
+      ],
     );
   }
 }
@@ -131,7 +149,7 @@ class _Origin extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        AppLabel(context.l10n.originLabel),
+        AppLabel(AppStrings.originLabel),
         SizedBox(height: context.spacing.base),
         Row(
           children: [
@@ -151,7 +169,7 @@ class _Origin extends StatelessWidget {
             ],
             Flexible(
               child: Text(
-                breed.origin ?? context.l10n.unknownOrigin,
+                breed.origin ?? AppStrings.unknownOrigin,
                 maxLines: 1,
                 overflow: TextOverflow.ellipsis,
                 style: context.typography.system.callout.copyWith(

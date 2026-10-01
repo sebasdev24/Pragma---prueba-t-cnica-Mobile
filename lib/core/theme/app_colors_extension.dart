@@ -1,9 +1,9 @@
 import 'package:catbreeds/core/theme/app_palette.dart';
 import 'package:flutter/material.dart';
 
-/// Nivel 2 – Tokens semánticos. Se accede con `context.colors.*`.
-/// Los nombres coinciden con las variables del archivo de Figma.
-/// La app solo tiene tema claro.
+/// Los colores con nombre de uso (`background`, `accent`...). Son los que
+/// usan las vistas, con `context.colors.*`, y se llaman igual que las
+/// variables del Figma.
 @immutable
 class AppColorsExtension extends ThemeExtension<AppColorsExtension> {
   /// bg/canvas
